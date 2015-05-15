@@ -9,7 +9,6 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.TypedValue;
 import android.view.Display;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -128,6 +127,26 @@ public class QuickContactFragment extends DialogFragment {
             MaterialRippleLayout materialRippleLayout = (MaterialRippleLayout) LayoutInflater.from(mContext).inflate(R.layout.custom_tab, parent, false);
             ((ImageView)materialRippleLayout.findViewById(R.id.image)).setImageResource(ICONS[position]);
             return materialRippleLayout;
+        }
+
+        @Override
+        public boolean setSelectedTabTypeface(TextView textView) {
+            return false;
+        }
+
+        @Override
+        public boolean setSelectedTextColor(TextView textView) {
+            return false;
+        }
+
+        @Override
+        public boolean setNotSelectedTextColor(TextView textView) {
+            return false;
+        }
+
+        @Override
+        public boolean setNotSelectedTabTypeface(TextView textView) {
+            return false;
         }
     }
 }
