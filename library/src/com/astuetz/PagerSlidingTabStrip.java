@@ -51,6 +51,14 @@ public class PagerSlidingTabStrip extends HorizontalScrollView {
 
     public interface CustomTabProvider {
         View getCustomTabView(ViewGroup parent, int position);
+
+        boolean setSelectedTabTypeface(TextView textView);
+
+        boolean setSelectedTextColor(TextView textView);
+
+        boolean setNotSelectedTextColor(TextView textView);
+
+        boolean setNotSelectedTabTypeface(TextView textView);
     }
 
     public interface OnTabReselectedListener {
@@ -117,6 +125,7 @@ public class PagerSlidingTabStrip extends HorizontalScrollView {
     private boolean shouldExpand = false;
     private boolean textAllCaps = true;
     private boolean isPaddingMiddle = false;
+    private boolean usingCustomTabs;
 
     private Typeface tabTypeface = null;
     private String tabTypefaceName = "sans-serif";
@@ -239,6 +248,7 @@ public class PagerSlidingTabStrip extends HorizontalScrollView {
 
     public void setViewPager(ViewPager pager) {
         this.pager = pager;
+        usingCustomTabs = pager.getAdapter() instanceof CustomTabProvider;
         if (pager.getAdapter() == null) {
             throw new IllegalStateException("ViewPager does not have adapter instance.");
         }
@@ -255,7 +265,7 @@ public class PagerSlidingTabStrip extends HorizontalScrollView {
         View tabView;
         for (int i = 0; i < tabCount; i++) {
 
-            if (pager.getAdapter() instanceof CustomTabProvider) {
+            if (usingCustomTabs) {
                 tabView = ((CustomTabProvider) pager.getAdapter()).getCustomTabView(this, i);
             } else {
                 tabView = LayoutInflater.from(getContext()).inflate(R.layout.psts_tab, this, false);
@@ -521,8 +531,17 @@ public class PagerSlidingTabStrip extends HorizontalScrollView {
         if (tab != null) {
             TextView title = (TextView) tab.findViewById(R.id.psts_tab_title);
             if (title != null) {
-                title.setTypeface(tabTypeface, tabTypefaceStyle);
-                title.setTextColor(tabTextColor);
+                if (usingCustomTabs) {
+                    if (!((CustomTabProvider) pager.getAdapter()).setNotSelectedTabTypeface(title)) {
+                        setTitleTypeface(title, tabTypefaceStyle);
+                    }
+                    if (!((CustomTabProvider) pager.getAdapter()).setNotSelectedTextColor(title)) {
+                        setTitleTextColor(title, tabTextColor);
+                    }
+                } else {
+                    setTitleTypeface(title, tabTypefaceStyle);
+                    setTitleTextColor(title, tabTextColor);
+                }
             }
         }
     }
@@ -531,10 +550,27 @@ public class PagerSlidingTabStrip extends HorizontalScrollView {
         if (tab != null) {
             TextView title = (TextView) tab.findViewById(R.id.psts_tab_title);
             if (title != null) {
-                title.setTypeface(tabTypeface, tabTypefaceSelectedStyle);
-                title.setTextColor(tabTextColorSelected);
+                if (usingCustomTabs) {
+                    if (!((CustomTabProvider) pager.getAdapter()).setSelectedTabTypeface(title)) {
+                        setTitleTypeface(title, tabTypefaceSelectedStyle);
+                    }
+                    if (!((CustomTabProvider) pager.getAdapter()).setSelectedTextColor(title)) {
+                        setTitleTextColor(title, tabTextColorSelected);
+                    }
+                } else {
+                    setTitleTypeface(title, tabTypefaceSelectedStyle);
+                    setTitleTextColor(title, tabTextColorSelected);
+                }
             }
         }
+    }
+
+    private void setTitleTextColor(TextView title, ColorStateList tabTextColorSelected) {
+        title.setTextColor(tabTextColorSelected);
+    }
+
+    private void setTitleTypeface(TextView title, int tabTypefaceSelectedStyle) {
+        title.setTypeface(tabTypeface, tabTypefaceSelectedStyle);
     }
 
     private class PagerAdapterObserver extends DataSetObserver {
